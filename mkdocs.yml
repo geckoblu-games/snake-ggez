@@ -7,3 +7,4 @@ theme:
 nav:
     - 'Introduction': index.md
     - 'Project setup': 00_projectsetup.md
+    - 'Open a Window': 01_justawindow.md
