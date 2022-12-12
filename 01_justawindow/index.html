@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    <link rel="canonical" href="https://geckoblu-games.github.io/snake-ggez/01_justawindow/">
+    <link rel="shortcut icon" href="../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Open a Window - Writing a Snake game with Rust and ggez</title>
+    <link href="../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../js/jquery-3.2.1.min.js"></script>
+    <script src="../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+        ];
+
+    </script>
+    <script src="../js/base.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav">
+      <a href="../00_projectsetup/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../00_projectsetup/" class="btn btn-xs btn-link">
+        Project setup
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <p>Time to start using ggez. We will try just to open a Window.</p>
+<p>From ggez's side, we'll need a <a href="https://docs.rs/ggez/0.8.1/ggez/context/struct.Context.html"><code>Context</code></a>, which is an object that provides access to the hardware:
+video for displaying the game, audio for playing sounds, keyboard for input and so on.
+A Context can be obtained from a <a href="https://docs.rs/ggez/0.8.1/ggez/context/struct.ContextBuilder.html"><code>ContextBuilder</code></a>.
+To make a <a href="https://docs.rs/ggez/0.8.1/ggez/context/struct.ContextBuilder.html"><code>ContextBuilder</code></a> you'll need a game ID.
+This will be used for the name of a directory in <code>~/.local/share</code> on the player's computer,
+where game resources can be stored (see the <a href="https://docs.rs/ggez/0.8.1/ggez/filesystem/index.html"><code>filesystem</code></a> module).
+You also need to provide a name for the game's author, but that's not used for GNU/Linux. 
+To create them just call:</p>
+<pre><code class="language-rust">let (mut ctx, event_loop) = ContextBuilder::new(&quot;hello-ggez&quot;, &quot;author&quot;).build()
+</code></pre>
+<p>We could now start the event loop, but we need first an <a href="https://docs.rs/ggez/0.8.1/ggez/event/trait.EventHandler.html"><code>EventHandler</code></a>.
+Were the logic of our game will reside.</p>
+<p>Just define a struct:</p>
+<pre><code class="language-rust">struct MyGame {}
+</code></pre>
+<p>and then implement the minimal <a href="https://docs.rs/ggez/0.8.1/ggez/event/trait.EventHandler.html"><code>EventHandler</code></a> trait</p>
+<pre><code class="language-rust">impl EventHandler for MyGame {
+    fn update(&amp;mut self, _ctx: &amp;mut Context) -&gt; GameResult {
+        todo!() // todo!()  is a macro which just exits the program with an error.
+    }
+
+    fn draw(&amp;mut self, ctx: &amp;mut Context) -&gt; GameResult {
+        todo!()
+    }
+}
+</code></pre>
+<p>Putting all together:</p>
+<pre><code class="language-rust">use ggez::event::EventHandler;
+use ggez::Context;
+use ggez::ContextBuilder;
+use ggez::GameResult;
+
+fn main() {
+    let (ctx, event_loop) = ContextBuilder::new(&quot;hello-ggez&quot;, &quot;author&quot;)
+        .build()
+        .expect(&quot;Could not create ggez context!&quot;);
+
+    let my_game = MyGame {};
+
+    event::run(ctx, event_loop, my_game)
+}
+
+struct MyGame {}
+
+impl EventHandler for MyGame {
+    fn update(&amp;mut self, _ctx: &amp;mut Context) -&gt; GameResult {
+        todo!() // todo!()  is a macro which just exits the program with an error.
+    }
+
+    fn draw(&amp;mut self, ctx: &amp;mut Context) -&gt; GameResult {
+        todo!()
+    }
+}
+</code></pre>
+<p>Now try to <code>run</code> it and ... nothing! The application just panic.</p>
+<pre><code>thread 'main' panicked at 'not yet implemented', src/main.rs:21:9
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+</code></pre>
+<p>Nothing special, the <code>event_loop</code> is just calling the <code>update()</code> method with has just a <code>todo!()</code>,
+so try a nicer empty implementation.</p>
+<pre><code class="language-rust">impl EventHandler for MyGame {
+    fn update(&amp;mut self, _ctx: &amp;mut Context) -&gt; GameResult {
+        Ok(())
+    }
+
+    fn draw(&amp;mut self, ctx: &amp;mut Context) -&gt; GameResult {
+        Ok(())
+    }
+}
+</code></pre>
+<p>Try to <code>run</code> again and this time a Window appears (<code>Esc</code> or <code>Alt-F4</code> to close).</p>
+<p>We are drawing nothing so the Window background could display some garbage,
+better to color it:</p>
+<pre><code class="language-rust">impl EventHandler for MyGame {
+    ...
+
+    fn draw(&amp;mut self, ctx: &amp;mut Context) -&gt; GameResult {
+        // Just a color for the background
+        let color = Color::from([0.1, 0.2, 0.3, 1.0]);
+
+        // Create a new Canvas that renders directly to the window surface.
+        let canvas = Canvas::from_frame(ctx, color);
+
+        // Finish drawing with this canvas and submit all the draw calls.
+        canvas.finish(ctx)
+    }
+}
+</code></pre>
+<p><a href="https://docs.rs/ggez/0.8.1/ggez/graphics/struct.Canvas.html"><code>Canvas</code></a> are the main places for drawing in ggez.
+Drawing are not made directly to the screen but instead on an internal buffer, so remeber to call <a href="https://docs.rs/ggez/0.8.1/ggez/graphics/struct.Canvas.html#method.finish"><code>finish()</code></a>
+at the end to flush drawings or you will not see them.</p>
+<p><code>run</code> another time and we finally have our fancy Window.</p>
+<p>As we are working with windows let set some attributes like title and size:</p>
+<pre><code class="language-rust">let (ctx, event_loop) = ContextBuilder::new(&quot;snake-ggez&quot;, &quot;author&quot;)
+    .window_setup(WindowSetup::default().title(&quot;Snake ggez&quot;))
+    .window_mode(WindowMode::default().dimensions(800.0, 640.0))
+    .build()
+</code></pre>
+<p>Read the documentation of <a href="https://docs.rs/ggez/0.8.1/ggez/conf/struct.WindowSetup.html"><code>WindowSetup</code></a> and <a href="https://docs.rs/ggez/0.8.1/ggez/conf/struct.WindowMode.html"><code>WindowMode</code></a> for a complete list of attributes.</p>
+<p>You could find the complete source of this lesson <a href="https://github.com/geckoblu-games/snake-ggez/blob/main/examples/01_justawindow.rs">here</a></p>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav">
+      <a href="../00_projectsetup/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../00_projectsetup/" class="btn btn-xs btn-link">
+        Project setup
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="container-fluid wm-page-content">
+  <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a> using <a href="https://github.com/gristlabs/mkdocs-windmill">Windmill</a> theme by Grist Labs.</p>
+</footer>
+
+</body>
+</html>
