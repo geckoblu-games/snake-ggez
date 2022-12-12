@@ -128,4 +128,4 @@ let (ctx, event_loop) = ContextBuilder::new("snake-ggez", "author")
 
 Read the documentation of [`WindowSetup`](https://docs.rs/ggez/0.8.1/ggez/conf/struct.WindowSetup.html) and [`WindowMode`](https://docs.rs/ggez/0.8.1/ggez/conf/struct.WindowMode.html) for a complete list of attributes.
 
-You could find the complete source of thi lesson [here](https://github.com/geckoblu-games/snake-ggez/blob/main/examples/01_justawindow.rs)
+You could find the complete source of this lesson [here](https://github.com/geckoblu-games/snake-ggez/blob/main/examples/01_justawindow.rs)
