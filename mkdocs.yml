@@ -1,0 +1,9 @@
+site_name: Writing a Snake game with Rust and ggez
+site_url: https://geckoblu-games.github.io/snake-ggez/
+
+theme: 
+    name: windmill 
+
+nav:
+    - 'Introduction': index.md
+    - 'Project setup': 00_projectsetup.md
