@@ -44,10 +44,9 @@ ___
 Adding ggez as a dependency is pretty simple. Just go to the `dependencies` section of your Cargo.toml and add `ggez = "0.8"`
 ```toml
 [package]
-name = "pong_tutorial"
+name = "snake-ggez"
 version = "0.1.0"
-authors = ["Mikail Khan <mikail.khan45@gmail.com>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
