@@ -56,6 +56,16 @@ if (is_top_frame) { $('body').addClass('wm-top-page'); }
 
   <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
     
+    <div class="wm-article-nav pull-right">
+      <a href="../02_drawanimage/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../02_drawanimage/" class="btn btn-xs btn-link">
+        Draw an Image
+      </a>
+    </div>
+    
     <div class="wm-article-nav">
       <a href="../00_projectsetup/" class="btn btn-xs btn-default pull-left">
         <i class="fa fa-chevron-left" aria-hidden="true"></i>
@@ -139,7 +149,7 @@ so try a nicer empty implementation.</p>
     }
 }
 </code></pre>
-<p>Try to <code>run</code> again and this time a Window appears (<code>Esc</code> or <code>Alt-F4</code> to close).</p>
+<p>Try to <code>run</code> again and this time a Window appears (<code>Esc</code> to close).</p>
 <p>We are drawing nothing so the Window background could display some garbage,
 better to color it:</p>
 <pre><code class="language-rust">impl EventHandler for MyGame {
@@ -179,6 +189,16 @@ at the end to flush drawings or you will not see them.</p>
     
 
   <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../02_drawanimage/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../02_drawanimage/" class="btn btn-xs btn-link">
+        Draw an Image
+      </a>
+    </div>
     
     <div class="wm-article-nav">
       <a href="../00_projectsetup/" class="btn btn-xs btn-default pull-left">

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    <link rel="canonical" href="https://geckoblu-games.github.io/snake-ggez/02_drawanimage/">
+    <link rel="shortcut icon" href="../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Draw an Image - Writing a Snake game with Rust and ggez</title>
+    <link href="../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../js/jquery-3.2.1.min.js"></script>
+    <script src="../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Draw a shape", url: "#_top", children: [
+          ]},
+          {title: "Draw an image", url: "#draw-an-image", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../js/base.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav">
+      <a href="../01_justawindow/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../01_justawindow/" class="btn btn-xs btn-link">
+        Open a Window
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <p>To write a game we need graphics, right?</p>
+<p>So let's start drawing something.</p>
+<h2 id="draw-a-shape">Draw a shape</h2>
+<p>The <code>Canvas</code> has a method <a href="https://docs.rs/ggez/0.8.1/ggez/graphics/struct.Canvas.html#method.draw"><code>draw(...)</code></a> which we can use:</p>
+<pre><code class="language-rust">pub fn draw(&amp;mut self, drawable: &amp;impl Drawable, param: impl Into&lt;DrawParam&gt;)
+</code></pre>
+<p>So first we need a <a href="https://docs.rs/ggez/0.8.1/ggez/graphics/trait.Drawable.html"><code>Drawable</code></a>.
+We start with a simple sqare for the head of our snake:</p>
+<pre><code class="language-rust">let head_color = Color::new(0.0, 1.0, 0.0, 1.0);
+let rect = Rect::new(10.0, 20.0, 32.0, 32.0);
+let head = Mesh::new_rectangle(ctx, DrawMode::fill(), rect, head_color)?;
+
+canvas.draw(&amp;head, DrawParam::default());
+</code></pre>
+<p>So we first define the <code>Color</code> of our head, then the <code>Rect</code>:</p>
+<pre><code class="language-rust">Rect::new(pos_x, pos_y, width, height)
+</code></pre>
+<p>and finally we could create a <a href="https://docs.rs/ggez/0.8.1/ggez/graphics/struct.Mesh.html"><code>Mesh</code></a> which implemens the Drawable method.</p>
+<p>Note the <a href="https://docs.rs/ggez/0.8.1/ggez/graphics/enum.DrawMode.html"><code>DrawMode</code></a> for the <a href="https://docs.rs/ggez/0.8.1/ggez/graphics/struct.Mesh.html"><code>Mesh</code></a> which is <a href="https://docs.rs/ggez/0.8.1/ggez/graphics/enum.DrawMode.html#variant.Fill"><code>fill</code></a> in our case (a filled shape)
+and the <a href="https://docs.rs/ggez/0.8.1/ggez/graphics/struct.DrawParam.html"><code>DrawParam</code></a> for the <a href="https://docs.rs/ggez/0.8.1/ggez/graphics/struct.Canvas.html#method.draw"><code>draw(...)</code></a> method which we will ignore for the moment setting it at its default values.</p>
+<p>Putting all together</p>
+<pre><code class="language-rust">use ggez::conf::WindowMode;
+use ggez::conf::WindowSetup;
+use ggez::event;
+use ggez::event::EventHandler;
+use ggez::graphics::Canvas;
+use ggez::graphics::Color;
+use ggez::graphics::DrawMode;
+use ggez::graphics::DrawParam;
+use ggez::graphics::Mesh;
+use ggez::graphics::Rect;
+use ggez::Context;
+use ggez::ContextBuilder;
+use ggez::GameResult;
+
+fn main() {
+    let (ctx, event_loop) = ContextBuilder::new(&quot;snake-ggez&quot;, &quot;author&quot;)
+        .window_setup(WindowSetup::default().title(&quot;Snake ggez&quot;))
+        .window_mode(WindowMode::default().dimensions(800.0, 640.0))
+        .build()
+        .expect(&quot;Could not create ggez context!&quot;);
+
+    let my_game = MyGame {};
+
+    event::run(ctx, event_loop, my_game)
+}
+
+struct MyGame {}
+
+impl EventHandler for MyGame {
+    fn update(&amp;mut self, _ctx: &amp;mut Context) -&gt; GameResult {
+        Ok(())
+    }
+
+    fn draw(&amp;mut self, ctx: &amp;mut Context) -&gt; GameResult {
+        // Just a color for the background
+        let background_color = Color::new(0.1, 0.2, 0.3, 1.0);
+
+        // Create a new Canvas that renders directly to the window surface.
+        let mut canvas = Canvas::from_frame(ctx, background_color);
+
+        // Create the snake head
+        let head_color = Color::new(0.0, 1.0, 0.0, 1.0);
+        let rect = Rect::new(10.0, 20.0, 32.0, 32.0);
+        let head = Mesh::new_rectangle(ctx, DrawMode::fill(), rect, head_color)?;
+
+        // Draw the snake head
+        canvas.draw(&amp;head, DrawParam::default());
+
+        // Finish drawing with this canvas and submit all the draw calls.
+        canvas.finish(ctx)
+    }
+}
+</code></pre>
+<p>Is possible to write a game combining various shapes but I prefer to use images, so ...</p>
+<h2 id="draw-an-image">Draw an image</h2>
+<p>Let's start with a minor problem.</p>
+<p>In order to display an image in the game, we need to have it stored somewhere.
+At runtime, <code>ggez</code> will look for resources in the <code>resources/</code> directory next to the executable (not in <code>$PWD</code>),
+or in <code>resources.zip</code> in the same place or in <code>~/.local/share/&lt;gameid&gt;/</code>.
+See also the documentation of the <a href="https://docs.rs/ggez/0.8.1/ggez/filesystem/"><code>filesystem</code></a> module and the <a href="https://github.com/ggez/ggez/blob/master/docs/FAQ.md#errors_resource"><code>FAQ entry about resource paths</code></a>.
+You'll probably want to have a <code>resources</code> directory in the project's root and create a symbolic link to it in <code>target/debug</code>.</p>
+<pre><code>.
+├── Cargo.toml
+├── resources
+│   └── my_image.png
+├── src
+│   └── main.rs
+└── target
+    └── debug
+        └── resources -&gt; ../../resources/
+</code></pre>
+<p>on <a href="https://github.com/geckoblu-games/snake-ggez"><code>github</code></a> you can find the images for this lesson.</p>
+<p>To load an image resource we just need a <code>Context</code> and a path</p>
+<pre><code>let image1 = graphics::Image::new(ctx, &quot;/my_image.png&quot;)?;
+</code></pre>
+<p>The image might be needed for the entire duration of the game,
+so a good owner for it might be a field of the game state struct.
+Also, we want to load the image as soon as the game starts,
+so we could do it in the <code>new()</code> function of the game state.
+Since <code>Image::new()</code> takes a <code>&amp;mut Context</code>, so will the <code>new()</code> function.</p>
+<pre><code class="language-rust">struct MyGame {
+    head_image: Image,
+}
+
+impl MyGame {
+    pub fn new(ctx: &amp;mut Context) -&gt; GameResult&lt;MyGame&gt; {
+        let head_image = Image::from_path(ctx, &quot;/snakehead.png&quot;)?;
+        let g = MyGame { head_image };
+        Ok(g)
+    }
+}
+</code></pre>
+<p>and then just </p>
+<pre><code class="language-rust">let my_dest = Vec2::new(500.0, 200.0);
+canvas.draw(&amp;self.image1, DrawParam::default().dest(my_dest));
+</code></pre>
+<p>so we display the head PNG instead of the simple green sqauare we have drawn before.</p>
+<p>Note that an <code>Image</code> hasn't a destination position so we need to set the destination
+using the <a href="https://docs.rs/ggez/0.8.1/ggez/graphics/struct.DrawParam.html"><code>DrawParam</code></a>.</p>
+<p>You could find the complete source of this lesson <a href="https://github.com/geckoblu-games/snake-ggez/blob/main/examples/02_drawanimage.rs">here</a></p>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav">
+      <a href="../01_justawindow/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../01_justawindow/" class="btn btn-xs btn-link">
+        Open a Window
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="container-fluid wm-page-content">
+  <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a> using <a href="https://github.com/gristlabs/mkdocs-windmill">Windmill</a> theme by Grist Labs.</p>
+</footer>
+
+</body>
+</html>
