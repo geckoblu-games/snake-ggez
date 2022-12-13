@@ -46,7 +46,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-ggez = "0.8"
+ggez = "0.8.1"
 ```
 
 Run `cargo build` now to download and build ggez and all of its dependencies. It might take a few minutes.

@@ -29,10 +29,10 @@ impl EventHandler for MyGame {
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         // Just a color for the background
-        let color = Color::from([0.1, 0.2, 0.3, 1.0]);
+        let background_color = Color::new(0.1, 0.2, 0.3, 1.0);
 
         // Create a new Canvas that renders directly to the window surface.
-        let canvas = Canvas::from_frame(ctx, color);
+        let canvas = Canvas::from_frame(ctx, background_color);
 
         // Finish drawing with this canvas and submit all the draw calls.
         canvas.finish(ctx)

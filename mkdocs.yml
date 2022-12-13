@@ -8,3 +8,4 @@ nav:
     - 'Introduction': index.md
     - 'Project setup': 00_projectsetup.md
     - 'Open a Window': 01_justawindow.md
+    - 'Draw an Image': 02_drawanimage.md

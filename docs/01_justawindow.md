@@ -89,7 +89,7 @@ impl EventHandler for MyGame {
 }
 ```
 
-Try to `run` again and this time a Window appears (`Esc` or `Alt-F4` to close).
+Try to `run` again and this time a Window appears (`Esc` to close).
 
 We are drawing nothing so the Window background could display some garbage,
 better to color it:
