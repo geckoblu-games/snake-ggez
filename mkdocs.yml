@@ -10,3 +10,4 @@ nav:
     - 'Open a Window': 01_justawindow.md
     - 'Draw an Image': 02_drawanimage.md
     - 'Draw text': 03_drawtext.md
+    - 'Input handling': 04_inputhandling.md

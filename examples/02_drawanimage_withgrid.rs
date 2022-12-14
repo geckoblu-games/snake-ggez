@@ -88,6 +88,7 @@ impl EventHandler for MyGame {
         // Draw the grid
         self.draw_grid(ctx, &mut canvas)?;
 
+		// Draw the snake head
         let head_dest = Vec2::new(32.0, 32.0);
         canvas.draw(&self.head_image, DrawParam::default().dest(head_dest));
 

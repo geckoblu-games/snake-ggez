@@ -60,6 +60,7 @@ impl EventHandler for MyGame {
         canvas.draw(&head, DrawParam::default());
         */
 
+		// Draw the snake head
         let head_dest = Vec2::new(10.0, 20.0);
         canvas.draw(&self.head_image, DrawParam::default().dest(head_dest));
 
