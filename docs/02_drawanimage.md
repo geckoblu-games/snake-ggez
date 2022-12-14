@@ -155,3 +155,4 @@ using the [`DrawParam`](https://docs.rs/ggez/0.8.1/ggez/graphics/struct.DrawPara
 
 You could find the complete source of this lesson [here](https://github.com/geckoblu-games/snake-ggez/blob/main/examples/02_drawanimage.rs)
 
+As esercise you could try to draw a 32px grid on the window, it will be usefull in the following (hint use [`new_line(...)`](https://docs.rs/ggez/0.8.1/ggez/graphics/struct.Mesh.html#method.new_line)).

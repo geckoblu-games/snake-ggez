@@ -12,3 +12,11 @@ The complete source code of this tutorial is available [`here`](https://github.c
 See also the `examples` for the code of the various lessons.
 
 
+## References
+A tanks to:
+
+[Hello ggez](https://codeberg.org/cosmin/hello-ggez/src/branch/main)
+
+[Pong tutorial with ggez](https://mkhan45.github.io/2020/05/19/Pong-tutorial-with-ggez.html)
+
+

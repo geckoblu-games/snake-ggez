@@ -9,3 +9,4 @@ nav:
     - 'Project setup': 00_projectsetup.md
     - 'Open a Window': 01_justawindow.md
     - 'Draw an Image': 02_drawanimage.md
+    - 'Draw text': 03_drawtext.md
