@@ -60,6 +60,16 @@ if (is_top_frame) { $('body').addClass('wm-top-page'); }
 
   <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
     
+    <div class="wm-article-nav pull-right">
+      <a href="../03_drawtext/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../03_drawtext/" class="btn btn-xs btn-link">
+        Draw text
+      </a>
+    </div>
+    
     <div class="wm-article-nav">
       <a href="../01_justawindow/" class="btn btn-xs btn-default pull-left">
         <i class="fa fa-chevron-left" aria-hidden="true"></i>
@@ -193,6 +203,7 @@ canvas.draw(&amp;self.image1, DrawParam::default().dest(my_dest));
 <p>Note that an <code>Image</code> hasn't a destination position so we need to set the destination
 using the <a href="https://docs.rs/ggez/0.8.1/ggez/graphics/struct.DrawParam.html"><code>DrawParam</code></a>.</p>
 <p>You could find the complete source of this lesson <a href="https://github.com/geckoblu-games/snake-ggez/blob/main/examples/02_drawanimage.rs">here</a></p>
+<p>As esercise you could try to draw a 32px grid on the window, it will be usefull in the following (hint use <a href="https://docs.rs/ggez/0.8.1/ggez/graphics/struct.Mesh.html#method.new_line"><code>new_line(...)</code></a>).</p>
 
   <br>
     
@@ -203,6 +214,16 @@ using the <a href="https://docs.rs/ggez/0.8.1/ggez/graphics/struct.DrawParam.htm
     
 
   <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav pull-right">
+      <a href="../03_drawtext/" class="btn btn-xs btn-default pull-right">
+        Next
+        <i class="fa fa-chevron-right" aria-hidden="true"></i>
+      </a>
+      <a href="../03_drawtext/" class="btn btn-xs btn-link">
+        Draw text
+      </a>
+    </div>
     
     <div class="wm-article-nav">
       <a href="../01_justawindow/" class="btn btn-xs btn-default pull-left">
