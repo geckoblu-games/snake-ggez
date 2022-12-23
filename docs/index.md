@@ -19,4 +19,6 @@ A tanks to:
 
 [Pong tutorial with ggez](https://mkhan45.github.io/2020/05/19/Pong-tutorial-with-ggez.html)
 
+[Ggez Snake example](https://github.com/ggez/ggez/blob/master/examples/04_snake.rs)
+
 
