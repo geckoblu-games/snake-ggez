@@ -12,3 +12,4 @@ nav:
     - 'Draw text': 03_drawtext.md
     - 'Input handling': 04_inputhandling.md
     - 'Game logic': 05_gamelogic.md
+    - 'Game logic (continued)': 06_gamelogic.md
