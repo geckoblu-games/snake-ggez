@@ -2,37 +2,42 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://geckoblu-games.github.io/snake-ggez/</loc>
-         <lastmod>2022-12-23</lastmod>
+         <lastmod>2022-12-24</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://geckoblu-games.github.io/snake-ggez/00_projectsetup/</loc>
-         <lastmod>2022-12-23</lastmod>
+         <lastmod>2022-12-24</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://geckoblu-games.github.io/snake-ggez/01_justawindow/</loc>
-         <lastmod>2022-12-23</lastmod>
+         <lastmod>2022-12-24</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://geckoblu-games.github.io/snake-ggez/02_drawanimage/</loc>
-         <lastmod>2022-12-23</lastmod>
+         <lastmod>2022-12-24</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://geckoblu-games.github.io/snake-ggez/03_drawtext/</loc>
-         <lastmod>2022-12-23</lastmod>
+         <lastmod>2022-12-24</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://geckoblu-games.github.io/snake-ggez/04_inputhandling/</loc>
-         <lastmod>2022-12-23</lastmod>
+         <lastmod>2022-12-24</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://geckoblu-games.github.io/snake-ggez/05_gamelogic/</loc>
-         <lastmod>2022-12-23</lastmod>
+         <lastmod>2022-12-24</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://geckoblu-games.github.io/snake-ggez/06_gamelogic/</loc>
+         <lastmod>2022-12-24</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>

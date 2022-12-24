@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+  
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    <link rel="canonical" href="https://geckoblu-games.github.io/snake-ggez/06_gamelogic/">
+    <link rel="shortcut icon" href="../img/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <title>Game logic (continued) - Writing a Snake game with Rust and ggez</title>
+    <link href="../css/bootstrap-3.3.7.min.css" rel="stylesheet">
+    <link href="../css/font-awesome-4.7.0.css" rel="stylesheet">
+    <link href="../css/base.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/highlight.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+
+    <script src="../js/jquery-3.2.1.min.js"></script>
+    <script src="../js/bootstrap-3.3.7.min.js"></script>
+    <script src="../js/highlight.pack.js"></script>
+    
+    <base target="_top">
+    <script>
+      var base_url = '..';
+      var is_top_frame = false;
+        
+        var pageToc = [
+          {title: "Food", url: "#_top", children: [
+          ]},
+          {title: "Body growth", url: "#body-growth", children: [
+          ]},
+          {title: "End", url: "#end", children: [
+          ]},
+        ];
+
+    </script>
+    <script src="../js/base.js"></script> 
+</head>
+
+<body>
+<script>
+if (is_top_frame) { $('body').addClass('wm-top-page'); }
+</script>
+
+
+
+<div class="container-fluid wm-page-content">
+  <a name="_top"></a>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav">
+      <a href="../05_gamelogic/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../05_gamelogic/" class="btn btn-xs btn-link">
+        Game logic
+      </a>
+    </div>
+    
+  </div>
+
+    
+
+    <h2 id="food">Food</h2>
+<p>Time to eat some food</p>
+<p>We need to place a fruit ramdomly on the grid</p>
+<pre><code class="language-rust">struct MyGame {
+
+    fruit_pos: GridPosition,
+    fruit_image: Image,
+
+    /// Our RNG state
+    rng: Rand32,
+
+    ...
+}
+
+impl MyGame {
+    pub fn new(ctx: &amp;mut Context) -&gt; GameResult&lt;MyGame&gt; {
+        let fruit_image = Image::from_path(ctx, &quot;/apple.png&quot;)?;
+
+        // We seed our RNG with the system RNG.
+        let mut seed: [u8; 8] = [0; 8];
+        getrandom::getrandom(&amp;mut seed[..]).expect(&quot;Could not create RNG seed&quot;);
+        let mut rng = Rand32::new(u64::from_ne_bytes(seed));
+
+        let fruit_pos = GridPosition::random(&amp;mut rng);
+
+        let g = MyGame {
+            ...
+        };
+        Ok(g)
+    }
+}
+
+impl GridPosition {
+    pub fn random(rng: &amp;mut Rand32) -&gt; Self {
+        let x = rng.rand_range(0..GRID_WIDTH);
+        let y = rng.rand_range(0..GRID_HEIGHT);
+        GridPosition { x, y }
+    }
+
+    ...
+}
+
+impl EventHandler for MyGame {
+    fn draw(&amp;mut self, ctx: &amp;mut Context) -&gt; GameResult {
+        // Create a new Canvas that renders directly to the window surface.
+        let mut canvas = Canvas::from_frame(ctx, COLOR_BACKGROUND);
+
+        ...
+
+        // Draw the fruit
+        canvas.draw(
+            &amp;self.fruit_image,
+            DrawParam::default().dest(self.fruit_pos.to_vec2()),
+        );
+
+        ...
+
+        // Finish drawing with this canvas and submit all the draw calls.
+        canvas.finish(ctx)
+    }
+}
+
+</code></pre>
+<p>and then we check for collision</p>
+<pre><code class="language-rust">impl EventHandler for MyGame {
+    fn update(&amp;mut self, ctx: &amp;mut Context) -&gt; GameResult {
+        self.process_input(ctx);
+
+        self.head_timer += ctx.time.delta();
+
+        if self.head_timer &gt;= MOVE_TIME {
+            self.head_pos.move_to_direction(self.dir);
+
+            if self.head_pos == self.fruit_pos {
+                self.score += 10;
+                self.fruit_pos = GridPosition::random(&amp;mut self.rng);
+            }
+
+            self.head_timer = Duration::from_millis(0);
+        }
+
+        Ok(())
+    }
+}
+</code></pre>
+<h2 id="body-growth">Body growth</h2>
+<p>Every time we eat a fruit the body grows</p>
+<pre><code class="language-rust">struct MyGame {
+    body: LinkedList&lt;GridPosition&gt;,
+
+    ...
+}
+
+impl EventHandler for MyGame {
+    fn update(&amp;mut self, ctx: &amp;mut Context) -&gt; GameResult {
+        self.process_input(ctx);
+
+        self.head_timer += ctx.time.delta();
+
+        if self.head_timer &gt;= MOVE_TIME {
+            self.body.push_front(self.head_pos);
+            self.head_pos.move_to_direction(self.dir);
+
+            if self.head_pos == self.fruit_pos {
+                self.score += FRUIT_POINTS;
+                self.fruit_pos = GridPosition::random(&amp;mut self.rng);
+            } else {
+                self.body.pop_back();
+            }
+
+            self.head_timer = Duration::from_millis(0);
+        }
+
+        Ok(())
+    }
+
+    fn draw(&amp;mut self, ctx: &amp;mut Context) -&gt; GameResult {
+        ...
+
+        for seg in self.body.iter() {
+            canvas.draw(&amp;self.body_image, DrawParam::default().dest(seg.to_vec2()));
+        }
+
+       ...
+    }    
+}
+</code></pre>
+<p>every time the head moves we put a body segment in front and remove one
+from the tail this generates the illusion the body is moving.
+We don't remove the tail if the snake eats a fruit, so the body grows.</p>
+<p>We then need to check if the head collide with its body, in that case the game is over.</p>
+<pre><code class="language-rust">impl EventHandler for MyGame {
+    fn update(&amp;mut self, ctx: &amp;mut Context) -&gt; GameResult {
+
+        ...
+
+        if self.head_timer &gt;= MOVE_TIME {
+            self.body.push_front(self.head_pos);
+            self.head_pos.move_to_direction(self.dir);
+
+            for seg in self.body.iter() {
+                if self.head_pos == *seg {
+                    panic!(&quot;Game over&quot;);
+                }
+            }
+
+            if self.head_pos == self.fruit_pos {
+                self.score += FRUIT_POINTS;
+                self.fruit_pos = GridPosition::random(&amp;mut self.rng);
+            } else {
+                self.body.pop_back();
+            }
+
+            self.head_timer = Duration::from_millis(0);
+        }
+
+        Ok(())
+    }
+}
+</code></pre>
+<p>You could find the complete source of this lesson <a href="https://github.com/geckoblu-games/snake-ggez/blob/main/examples/06_snake.rs">here</a></p>
+<h2 id="end">End</h2>
+<p>The game is complete now, well playable, it needs to fix some details to be a complete game.
+A start menu and a game over menu,
+a way to avoid to turn the head in the opposite direction (this would cause an immediate game over)
+and a way to avoid to place a new fruit over the snake body.</p>
+<p>This is left as an exercise but you can find my solution <a href="https://github.com/geckoblu-games/snake-ggez">here</a>.</p>
+
+  <br>
+    
+
+    
+    
+      
+    
+
+  <div class="row wm-article-nav-buttons" role="navigation" aria-label="navigation">
+    
+    <div class="wm-article-nav">
+      <a href="../05_gamelogic/" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        Previous</a><a href="../05_gamelogic/" class="btn btn-xs btn-link">
+        Game logic
+      </a>
+    </div>
+    
+  </div>
+
+    <br>
+</div>
+
+<footer class="container-fluid wm-page-content">
+  <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a> using <a href="https://github.com/gristlabs/mkdocs-windmill">Windmill</a> theme by Grist Labs.</p>
+</footer>
+
+</body>
+</html>
