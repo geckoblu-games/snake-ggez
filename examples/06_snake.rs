@@ -42,9 +42,7 @@ enum Direction {
 }
 
 /// A struct that will hold an entity's position on our game board
-/// or grid which we defined above. We'll use signed integers because we only want
-/// to store whole numbers, and we need them to be signed so that they work properly
-/// with our modulus arithmetic later.
+/// or grid which we defined above.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 struct GridPosition {
     x: u32,
@@ -184,9 +182,9 @@ impl MyGame {
         while x < WINDOW_WIDTH {
             point1.x = x;
             point2.x = x;
-            let hline = Mesh::new_line(ctx, &[point1, point2], 1.0, COLOR_GRAY).unwrap();
-            // Draw an horizzontal line
-            canvas.draw(&hline, DrawParam::default());
+            let vline = Mesh::new_line(ctx, &[point1, point2], 1.0, COLOR_GRAY).unwrap();
+            // Draw a vertical line
+            canvas.draw(&vline, DrawParam::default());
             x += CELL_SIZE as f32;
         }
 
@@ -309,6 +307,7 @@ impl EventHandler for MyGame {
             DrawParam::default().dest(self.fruit_pos.to_vec2()),
         );
 
+        // Draw th body
         for seg in self.body.iter() {
             canvas.draw(&self.body_image, DrawParam::default().dest(seg.to_vec2()));
         }
