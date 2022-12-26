@@ -142,6 +142,8 @@ struct MyGame {
     show_grid: bool,
     /// Hide / show the FPS
     show_fps: bool,
+    /// Game is paused
+    paused: bool,
 
     /// Head image
     head_image: Image,
@@ -179,6 +181,7 @@ impl MyGame {
             score: 0,
             show_grid: true,
             show_fps: true,
+            paused: false,
             head_timer: Duration::from_millis(0),
             rng,
             body,
@@ -276,8 +279,8 @@ impl MyGame {
 
     /// Change the direction when an arrow key is pressed
     fn process_input(&mut self, ctx: &Context) {
-		// Turn the direction based on the key pressed,
-		// but avoid the opposite direction if the snake has a body
+        // Turn the direction based on the key pressed,
+        // but avoid the opposite direction if the snake has a body
         if ctx.keyboard.is_key_pressed(KeyCode::Down)
             && (self.body.is_empty() || !self.dir.opposite(Direction::Down))
         {
@@ -296,53 +299,74 @@ impl MyGame {
             self.dir_new = Some(Direction::Left);
         }
     }
+
+    /// Return a random free position on the grid
+    fn random_free_pos(&mut self) -> GridPosition {
+        let mut freepos: Vec<GridPosition> = Vec::new();
+
+        for y in 0..GRID_HEIGHT {
+            for x in 0..GRID_WIDTH {
+                let p = GridPosition::new(x, y);
+                if p != self.head_pos && !self.body.contains(&p) {
+                    freepos.push(p)
+                }
+            }
+        }
+
+        // TODO: what if not freepos?
+
+        let i = self.rng.rand_range(0..freepos.len() as u32) as usize;
+
+        freepos[i]
+    }
 }
 
 impl EventHandler for MyGame {
-	/// The main update function for our snake which gets called every time
+    /// The main update function for our snake which gets called every time
     /// we want to update the game state.
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-		// Check input
-        self.process_input(ctx);
+        if !self.paused {
+            // Check input
+            self.process_input(ctx);
 
-		// Time from the last snake movement
-        self.head_timer += ctx.time.delta();
+            // Time from the last snake movement
+            self.head_timer += ctx.time.delta();
 
-		// If it's time move the snake
-        if self.head_timer >= MOVE_TIME {
-			// Eventually change the direction
-            if let Some(dir_new) = self.dir_new {
-                self.dir = dir_new;
-                self.dir_new = None;
-            }
-
-			// Move the head
-            self.body.push_front(self.head_pos);
-            self.head_pos.move_to_direction(self.dir);
-
-			// If the snake eats itself is game over
-            for seg in self.body.iter() {
-                if self.head_pos == *seg {
-                    panic!("Game over");
+            // If it's time move the snake
+            if self.head_timer >= MOVE_TIME {
+                // Eventually change the direction
+                if let Some(dir_new) = self.dir_new {
+                    self.dir = dir_new;
+                    self.dir_new = None;
                 }
-            }
 
-			// If the snake eats a fruit increment the score and the body lenght
-            if self.head_pos == self.fruit_pos {
-                self.score += FRUIT_POINTS;
-                self.fruit_pos = GridPosition::random(&mut self.rng);
-            } else {
-                self.body.pop_back();
-            }
+                // Move the head
+                self.body.push_front(self.head_pos);
+                self.head_pos.move_to_direction(self.dir);
 
-			// Reset the timer
-            self.head_timer = Duration::from_millis(0);
+                // If the snake eats itself is game over
+                for seg in self.body.iter() {
+                    if self.head_pos == *seg {
+                        panic!("Game over");
+                    }
+                }
+
+                // If the snake eats a fruit increment the score and the body lenght
+                if self.head_pos == self.fruit_pos {
+                    self.score += FRUIT_POINTS;
+                    self.fruit_pos = self.random_free_pos();
+                } else {
+                    self.body.pop_back();
+                }
+
+                // Reset the timer
+                self.head_timer = Duration::from_millis(0);
+            }
         }
-
         Ok(())
     }
 
-	/// The main drawing function
+    /// The main drawing function
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         // Create a new Canvas that renders directly to the window surface.
         let mut canvas = Canvas::from_frame(ctx, COLOR_BACKGROUND);
@@ -351,14 +375,6 @@ impl EventHandler for MyGame {
         if self.show_grid {
             self.draw_grid(ctx, &mut canvas)?;
         }
-
-        // Draw FPS
-        if self.show_fps {
-            self.draw_fps(ctx, &mut canvas)?;
-        }
-
-        // Draw the score
-        self.draw_score(ctx, &mut canvas)?;
 
         // Draw the fruit
         canvas.draw(
@@ -377,15 +393,25 @@ impl EventHandler for MyGame {
             DrawParam::default().dest(self.head_pos.as_vec2()),
         );
 
+        // Draw FPS
+        if self.show_fps {
+            self.draw_fps(ctx, &mut canvas)?;
+        }
+
+        // Draw the score
+        self.draw_score(ctx, &mut canvas)?;
+
         // Finish drawing with this canvas and submit all the draw calls.
         canvas.finish(ctx)
     }
 
-	/// A keyboard button was pressed.
-    fn key_down_event(&mut self, _ctx: &mut Context, input: KeyInput, _repetd: bool) -> GameResult {
+    /// A keyboard button was pressed.
+    fn key_down_event(&mut self, ctx: &mut Context, input: KeyInput, _repetd: bool) -> GameResult {
         match input.keycode.unwrap() {
             KeyCode::G => self.show_grid = !self.show_grid,
             KeyCode::F => self.show_fps = !self.show_fps,
+            KeyCode::P => self.paused = !self.paused,
+            KeyCode::Q => ctx.request_quit(), // TODO: ask for confirmation
             _ => {}
         }
 
