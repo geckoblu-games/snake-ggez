@@ -83,7 +83,8 @@ if (is_top_frame) { $('body').addClass('wm-top-page'); }
     
 
     <h2 id="create-a-project">Create a project</h2>
-<p>To get started, make a new folder and initialize a Rust project with <code>cargo init</code>. If you don't have rust installed, install it with <a href="https://rustup.rs/">rustup</a>. If you're on Linux rustup is probably already in your distro's repositories.</p>
+<p>To get started, make a new folder and initialize a Rust project with <code>cargo init</code>.
+If you don't have rust installed, install it with <a href="https://rustup.rs/">rustup</a>.</p>
 <p>After running <code>cargo init</code>, you should have a folder structure like this:</p>
 <pre><code>.
 ├── Cargo.lock
@@ -107,9 +108,12 @@ edition = &quot;2021&quot;
     println!(&quot;Hello, world!&quot;);
 }
 </code></pre>
-<p>Run <code>cargo build</code> to build your project, and <code>cargo run</code> to run it. If you just want to check for project for syntax and type errors, run <code>cargo check</code>. It's a lot faster than <code>cargo build</code>.</p>
+<p>Run <code>cargo build</code> to build your project, and <code>cargo run</code> to run it.
+If you just want to check for project for syntax and type errors, run <code>cargo check</code>.
+It's a lot faster than <code>cargo build</code>.</p>
 <h2 id="ggez-basics">ggez basics</h2>
-<p>Adding ggez as a dependency is pretty simple. Just go to the <code>dependencies</code> section of your Cargo.toml and add <code>ggez = "0.8"</code></p>
+<p>Adding ggez as a dependency is pretty simple.
+Just go to the <code>dependencies</code> section of your Cargo.toml and add <code>ggez = "0.8"</code></p>
 <pre><code class="language-toml">[package]
 name = &quot;snake-ggez&quot;
 version = &quot;0.1.0&quot;
@@ -121,7 +125,7 @@ edition = &quot;2021&quot;
 ggez = &quot;0.8.1&quot;
 </code></pre>
 <p>Run <code>cargo build</code> now to download and build ggez and all of its dependencies. It might take a few minutes.</p>
-<p>The behavior of the program hasn't actually changed at all yet. <code>cargo run</code> will still just output "Hello,</p>
+<p>The behavior of the program hasn't actually changed at all yet. <code>cargo run</code> will still just output "Hello, world!"</p>
 
   <br>
     
