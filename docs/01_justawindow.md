@@ -1,6 +1,7 @@
 Time to start using ggez. We will try just to open a Window.
 
-From ggez's side, we'll need a [`Context`](https://docs.rs/ggez/0.8.1/ggez/context/struct.Context.html), which is an object that provides access to the hardware:
+From ggez's side, we'll need a [`Context`](https://docs.rs/ggez/0.8.1/ggez/context/struct.Context.html),
+which is an object that provides access to the hardware:
 video for displaying the game, audio for playing sounds, keyboard for input and so on.
 A Context can be obtained from a [`ContextBuilder`](https://docs.rs/ggez/0.8.1/ggez/context/struct.ContextBuilder.html).
 To make a [`ContextBuilder`](https://docs.rs/ggez/0.8.1/ggez/context/struct.ContextBuilder.html) you'll need a game ID.

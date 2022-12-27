@@ -199,7 +199,7 @@ impl MyGame {
         // Set font size
         text.set_scale(PxScale::from(20.0));
 
-        // Set text position to the center of the screen
+        // Set text position to the bottom-right of the screen
         let m = text.measure(ctx)?;
         let coords = [
             WINDOW_WIDTH - m.x - CELL_SIZE as f32 / 2.0,
@@ -226,7 +226,7 @@ impl MyGame {
         // Set font size
         text.set_scale(PxScale::from(20.0));
 
-        // Set text position to the center of the screen
+        // Set text position to the bottom-left of the screen
         let m = text.measure(ctx)?;
         let coords = [
             CELL_SIZE as f32 / 2.0,

@@ -157,6 +157,9 @@ struct MyGame {
     /// Game state
     state: GameState,
 
+    /// Counter used by the choose_random_direction function
+    choose_random_direction_counter: u32,
+
     /// Head image
     head_image: Image,
     /// Body image
@@ -180,7 +183,11 @@ impl MyGame {
 
         let head_pos = GridPosition::new(4, 4);
         let fruit_pos = GridPosition::new(4, 4);
-        let body = LinkedList::new();
+        let mut body = LinkedList::new();
+        body.push_back(GridPosition::new(3, 4));
+        body.push_back(GridPosition::new(2, 4));
+        body.push_back(GridPosition::new(1, 4));
+        body.push_back(GridPosition::new(0, 4));
 
         let mut g = MyGame {
             head_image,
@@ -188,6 +195,8 @@ impl MyGame {
             fruit_image,
             head_pos,
             fruit_pos,
+            body,
+            rng,
             dir: Direction::Right,
             dir_new: None,
             score: 0,
@@ -195,8 +204,7 @@ impl MyGame {
             show_fps: true,
             state: GameState::Starting,
             head_timer: Duration::from_millis(0),
-            rng,
-            body,
+            choose_random_direction_counter: 0,
         };
 
         g.fruit_pos = g.random_free_pos();
@@ -206,7 +214,7 @@ impl MyGame {
 
     fn restart(&mut self) {
         self.head_pos = GridPosition::new(4, 4);
-        self.body = LinkedList::new();
+        self.body.clear();
         self.fruit_pos = self.random_free_pos();
         self.dir = Direction::Right;
         self.dir_new = None;
@@ -316,7 +324,7 @@ impl MyGame {
             DrawParam::default().dest(self.fruit_pos.as_vec2()),
         );
 
-        // Draw th body
+        // Draw the body
         for seg in self.body.iter() {
             canvas.draw(&self.body_image, DrawParam::default().dest(seg.as_vec2()));
         }
@@ -343,6 +351,17 @@ impl MyGame {
         if self.show_grid {
             self.draw_grid(ctx, canvas)?;
         }
+
+        // Draw the body
+        for seg in self.body.iter() {
+            canvas.draw(&self.body_image, DrawParam::default().dest(seg.as_vec2()));
+        }
+
+        // Draw the snake head
+        canvas.draw(
+            &self.head_image,
+            DrawParam::default().dest(self.head_pos.as_vec2()),
+        );
 
         // Create a new text
         let mut text1 = Text::new("SNAKE");
@@ -466,11 +485,32 @@ impl MyGame {
             }
         }
 
-        // TODO: what if not freepos?
+        // This should happens only when the snake body fills all the grid
+        if freepos.is_empty() {
+            self.body.clear();
+            return self.random_free_pos();
+        }
 
         let i = self.rng.rand_range(0..freepos.len() as u32) as usize;
 
         freepos[i]
+    }
+
+    /// Choose a new random direction for the snake
+    fn choose_random_direction(&mut self) {
+        let d = self.rng.rand_range(0..4);
+        let somedir = match d {
+            0 => Some(Direction::Down),
+            1 => Some(Direction::Left),
+            2 => Some(Direction::Right),
+            4 => Some(Direction::Up),
+            _ => None,
+        };
+        if let Some(dir_new) = somedir {
+            if !dir_new.opposite(self.dir) {
+                self.dir_new = somedir;
+            }
+        }
     }
 }
 
@@ -481,12 +521,23 @@ impl EventHandler for MyGame {
         if self.state == GameState::Running {
             // Check input
             self.process_input(ctx);
+        }
 
+        if self.state == GameState::Running || self.state == GameState::Starting {
             // Time from the last snake movement
             self.head_timer += ctx.time.delta();
 
             // If it's time move the snake
             if self.head_timer >= MOVE_TIME {
+                // Choose a random direction
+                if self.state == GameState::Starting {
+                    self.choose_random_direction_counter += 1;
+                    if self.choose_random_direction_counter > 3 {
+                        self.choose_random_direction();
+                        self.choose_random_direction_counter = 0;
+                    }
+                }
+
                 // Eventually change the direction
                 if let Some(dir_new) = self.dir_new {
                     self.dir = dir_new;
@@ -516,6 +567,7 @@ impl EventHandler for MyGame {
                 self.head_timer = Duration::from_millis(0);
             }
         }
+
         Ok(())
     }
 
@@ -540,7 +592,7 @@ impl EventHandler for MyGame {
         match self.state {
             GameState::Starting => match input.keycode.unwrap() {
                 KeyCode::Q | KeyCode::Escape => ctx.request_quit(),
-                _ => self.state = GameState::Running,
+                _ => self.restart(),
             },
             GameState::GameOver => match input.keycode.unwrap() {
                 KeyCode::Q | KeyCode::Escape | KeyCode::N => ctx.request_quit(),
@@ -559,7 +611,7 @@ impl EventHandler for MyGame {
             _ => match input.keycode.unwrap() {
                 KeyCode::G => self.show_grid = !self.show_grid,
                 KeyCode::F => self.show_fps = !self.show_fps,
-                KeyCode::P => {
+                KeyCode::P | KeyCode::Space => {
                     self.state = match self.state {
                         GameState::Running => GameState::Paused,
                         GameState::Paused => GameState::Running,
