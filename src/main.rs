@@ -32,6 +32,16 @@ const COLOR_GRAY: Color = Color::new(0.2, 0.2, 0.2, 1.0);
 
 const MOVE_TIME: Duration = Duration::from_millis(300);
 
+/// An enum with all the possible game states
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum GameState {
+    Starting,
+    Running,
+    Paused,
+    GameOver,
+    Quitting,
+}
+
 /// An enum that will represent all the possible
 /// directions that our snake could move.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -71,12 +81,14 @@ impl GridPosition {
         GridPosition { x, y }
     }
 
+    /*
     /// An helper function that will give us a random `GridPosition` in the grid
     pub fn random(rng: &mut Rand32) -> Self {
         let x = rng.rand_range(0..GRID_WIDTH);
         let y = rng.rand_range(0..GRID_HEIGHT);
         GridPosition { x, y }
     }
+    */
 
     /// Move the position in the given direction.
     /// The grid is toroidal
@@ -142,8 +154,8 @@ struct MyGame {
     show_grid: bool,
     /// Hide / show the FPS
     show_fps: bool,
-    /// Game is paused
-    paused: bool,
+    /// Game state
+    state: GameState,
 
     /// Head image
     head_image: Image,
@@ -164,13 +176,13 @@ impl MyGame {
         // We seed our RNG with the system RNG.
         let mut seed: [u8; 8] = [0; 8];
         getrandom::getrandom(&mut seed[..]).expect("Could not create RNG seed");
-        let mut rng = Rand32::new(u64::from_ne_bytes(seed));
+        let rng = Rand32::new(u64::from_ne_bytes(seed));
 
         let head_pos = GridPosition::new(4, 4);
-        let fruit_pos = GridPosition::random(&mut rng);
+        let fruit_pos = GridPosition::new(4, 4);
         let body = LinkedList::new();
 
-        let g = MyGame {
+        let mut g = MyGame {
             head_image,
             body_image,
             fruit_image,
@@ -181,12 +193,26 @@ impl MyGame {
             score: 0,
             show_grid: true,
             show_fps: true,
-            paused: false,
+            state: GameState::Starting,
             head_timer: Duration::from_millis(0),
             rng,
             body,
         };
+
+        g.fruit_pos = g.random_free_pos();
+
         Ok(g)
+    }
+
+    fn restart(&mut self) {
+        self.head_pos = GridPosition::new(4, 4);
+        self.body = LinkedList::new();
+        self.fruit_pos = self.random_free_pos();
+        self.dir = Direction::Right;
+        self.dir_new = None;
+        self.score = 0;
+        self.state = GameState::Running;
+        self.head_timer = Duration::from_millis(0);
     }
 
     /// Draw the grid
@@ -233,7 +259,7 @@ impl MyGame {
         // Set font size
         text.set_scale(PxScale::from(20.0));
 
-        // Set text position to the center of the screen
+        // Set text position to the bottom-right of the screen
         let m = text.measure(ctx)?;
         let coords = [
             WINDOW_WIDTH - m.x - CELL_SIZE as f32 / 2.0,
@@ -261,7 +287,7 @@ impl MyGame {
         // Set font size
         text.set_scale(PxScale::from(20.0));
 
-        // Set text position to the center of the screen
+        // Set text position to the bottom-left of the screen
         let m = text.measure(ctx)?;
         let coords = [
             CELL_SIZE as f32 / 2.0,
@@ -273,6 +299,133 @@ impl MyGame {
 
         // Draw the text
         canvas.draw(&text, params);
+
+        Ok(())
+    }
+
+    /// Draw the arena of a running game
+    fn draw_running(&self, ctx: &mut Context, canvas: &mut Canvas) -> GameResult {
+        // Draw the grid
+        if self.show_grid {
+            self.draw_grid(ctx, canvas)?;
+        }
+
+        // Draw the fruit
+        canvas.draw(
+            &self.fruit_image,
+            DrawParam::default().dest(self.fruit_pos.as_vec2()),
+        );
+
+        // Draw th body
+        for seg in self.body.iter() {
+            canvas.draw(&self.body_image, DrawParam::default().dest(seg.as_vec2()));
+        }
+
+        // Draw the snake head
+        canvas.draw(
+            &self.head_image,
+            DrawParam::default().dest(self.head_pos.as_vec2()),
+        );
+
+        // Draw FPS
+        if self.show_fps {
+            self.draw_fps(ctx, canvas)?;
+        }
+
+        // Draw the score
+        self.draw_score(ctx, canvas)?;
+
+        Ok(())
+    }
+
+    fn draw_starting(&self, ctx: &mut Context, canvas: &mut Canvas) -> GameResult {
+        // Draw the grid
+        if self.show_grid {
+            self.draw_grid(ctx, canvas)?;
+        }
+
+        // Create a new text
+        let mut text1 = Text::new("SNAKE");
+        let mut text2 = Text::new("Press any key to start");
+
+        // Set font size
+        text1.set_scale(PxScale::from(200.0));
+        text2.set_scale(PxScale::from(20.0));
+
+        // Set text position to the center of the screen
+        let m1 = text1.measure(ctx)?;
+        let m2 = text2.measure(ctx)?;
+
+        let y1 = (WINDOW_HEIGHT - m1.y) / 2.0;
+        let y2 = (WINDOW_HEIGHT - m2.y + m1.y) / 2.0;
+        let coords1 = [(WINDOW_WIDTH - m1.x) / 2.0, y1];
+        let coords2 = [(WINDOW_WIDTH - m2.x) / 2.0, y2];
+
+        // Set params
+        let params = DrawParam::default().dest(coords1).color(Color::GREEN);
+        // Draw the text
+        canvas.draw(&text1, params);
+
+        // Set params
+        let params = DrawParam::default().dest(coords2).color(Color::WHITE);
+        // Draw the text
+        canvas.draw(&text2, params);
+
+        Ok(())
+    }
+
+    fn draw_gameover(&self, ctx: &mut Context, canvas: &mut Canvas) -> GameResult {
+        self.draw_running(ctx, canvas)?;
+
+        // Create a new text
+        let mut text1 = Text::new("GAME OVER");
+        let mut text2 = Text::new("Do you want to play again? (Y / N)");
+
+        // Set font size
+        text1.set_scale(PxScale::from(100.0));
+        text2.set_scale(PxScale::from(20.0));
+
+        // Set text position to the center of the screen
+        let m1 = text1.measure(ctx)?;
+        let m2 = text2.measure(ctx)?;
+
+        let y1 = (WINDOW_HEIGHT - m1.y) / 2.0;
+        let y2 = (WINDOW_HEIGHT - m2.y + m1.y) / 2.0;
+        let coords1 = [(WINDOW_WIDTH - m1.x) / 2.0, y1];
+        let coords2 = [(WINDOW_WIDTH - m2.x) / 2.0, y2];
+
+        // Set params
+        let params = DrawParam::default().dest(coords1).color(Color::GREEN);
+        // Draw the text
+        canvas.draw(&text1, params);
+
+        // Set params
+        let params = DrawParam::default().dest(coords2).color(Color::WHITE);
+        // Draw the text
+        canvas.draw(&text2, params);
+
+        Ok(())
+    }
+
+    fn draw_quitting(&self, ctx: &mut Context, canvas: &mut Canvas) -> GameResult {
+        self.draw_running(ctx, canvas)?;
+
+        // Create a new text
+        let mut text2 = Text::new("Do you really want to quit? (Y / N)");
+
+        // Set font size
+        text2.set_scale(PxScale::from(20.0));
+
+        // Set text position to the center of the screen
+        let m2 = text2.measure(ctx)?;
+
+        let y2 = (WINDOW_HEIGHT - m2.y) / 2.0;
+        let coords2 = [(WINDOW_WIDTH - m2.x) / 2.0, y2];
+
+        // Set params
+        let params = DrawParam::default().dest(coords2).color(Color::WHITE);
+        // Draw the text
+        canvas.draw(&text2, params);
 
         Ok(())
     }
@@ -325,7 +478,7 @@ impl EventHandler for MyGame {
     /// The main update function for our snake which gets called every time
     /// we want to update the game state.
     fn update(&mut self, ctx: &mut Context) -> GameResult {
-        if !self.paused {
+        if self.state == GameState::Running {
             // Check input
             self.process_input(ctx);
 
@@ -347,7 +500,7 @@ impl EventHandler for MyGame {
                 // If the snake eats itself is game over
                 for seg in self.body.iter() {
                     if self.head_pos == *seg {
-                        panic!("Game over");
+                        self.state = GameState::GameOver;
                     }
                 }
 
@@ -371,35 +524,12 @@ impl EventHandler for MyGame {
         // Create a new Canvas that renders directly to the window surface.
         let mut canvas = Canvas::from_frame(ctx, COLOR_BACKGROUND);
 
-        // Draw the grid
-        if self.show_grid {
-            self.draw_grid(ctx, &mut canvas)?;
-        }
-
-        // Draw the fruit
-        canvas.draw(
-            &self.fruit_image,
-            DrawParam::default().dest(self.fruit_pos.as_vec2()),
-        );
-
-        // Draw th body
-        for seg in self.body.iter() {
-            canvas.draw(&self.body_image, DrawParam::default().dest(seg.as_vec2()));
-        }
-
-        // Draw the snake head
-        canvas.draw(
-            &self.head_image,
-            DrawParam::default().dest(self.head_pos.as_vec2()),
-        );
-
-        // Draw FPS
-        if self.show_fps {
-            self.draw_fps(ctx, &mut canvas)?;
-        }
-
-        // Draw the score
-        self.draw_score(ctx, &mut canvas)?;
+        match self.state {
+            GameState::Starting => self.draw_starting(ctx, &mut canvas)?,
+            GameState::GameOver => self.draw_gameover(ctx, &mut canvas)?,
+            GameState::Quitting => self.draw_quitting(ctx, &mut canvas)?,
+            _ => self.draw_running(ctx, &mut canvas)?,
+        };
 
         // Finish drawing with this canvas and submit all the draw calls.
         canvas.finish(ctx)
@@ -407,13 +537,39 @@ impl EventHandler for MyGame {
 
     /// A keyboard button was pressed.
     fn key_down_event(&mut self, ctx: &mut Context, input: KeyInput, _repetd: bool) -> GameResult {
-        match input.keycode.unwrap() {
-            KeyCode::G => self.show_grid = !self.show_grid,
-            KeyCode::F => self.show_fps = !self.show_fps,
-            KeyCode::P => self.paused = !self.paused,
-            KeyCode::Q => ctx.request_quit(), // TODO: ask for confirmation
-            _ => {}
-        }
+        match self.state {
+            GameState::Starting => match input.keycode.unwrap() {
+                KeyCode::Q | KeyCode::Escape => ctx.request_quit(),
+                _ => self.state = GameState::Running,
+            },
+            GameState::GameOver => match input.keycode.unwrap() {
+                KeyCode::Q | KeyCode::Escape | KeyCode::N => ctx.request_quit(),
+                KeyCode::Y => {
+                    self.restart();
+                }
+                _ => {}
+            },
+            GameState::Quitting => match input.keycode.unwrap() {
+                KeyCode::Q | KeyCode::Escape | KeyCode::Y => ctx.request_quit(),
+                KeyCode::N => {
+                    self.state = GameState::Running;
+                }
+                _ => {}
+            },
+            _ => match input.keycode.unwrap() {
+                KeyCode::G => self.show_grid = !self.show_grid,
+                KeyCode::F => self.show_fps = !self.show_fps,
+                KeyCode::P => {
+                    self.state = match self.state {
+                        GameState::Running => GameState::Paused,
+                        GameState::Paused => GameState::Running,
+                        _ => self.state,
+                    }
+                }
+                KeyCode::Q | KeyCode::Escape => self.state = GameState::Quitting,
+                _ => {}
+            },
+        };
 
         Ok(())
     }
